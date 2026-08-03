@@ -33,3 +33,19 @@ def signup():
 
     token = create_access_token(identity=str(user.id))
     return jsonify({"user": user.to_dict(), "access_token": token}), 201
+
+@auth_bp.route("/login", methods=["POST"])
+def login():
+    data = request.get_json() or {}
+    username = data.get("username")
+    password = data.get("password")
+
+    if not username or not password:
+        return jsonify({"error": "username and password are required."}), 400
+
+    user = User.query.filter_by(username=username).first()
+    if not user or not user.check_password(password):
+        return jsonify({"error": "invalid username or password."}), 401
+
+    token = create_access_token(identity=str(user.id))
+    return jsonify({"user": user.to_dict(), "access_token": token}), 200
