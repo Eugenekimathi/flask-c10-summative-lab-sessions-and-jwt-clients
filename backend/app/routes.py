@@ -20,10 +20,12 @@ def parse_date(value):
 @workouts_bp.route("/workouts", methods=["GET"])
 @jwt_required()
 def get_workouts():
+    user_id = get_jwt_identity()
     page = request.args.get("page", 1, type=int)
     per_page = min(request.args.get("per_page", 10, type=int), 50)
 
-    pagination = Workout.query.paginate(page=page, per_page=per_page, error_out=False)
+    pagination = Workout.query.filter_by(user_id=user_id).paginate(
+        page=page, per_page=per_page, error_out=False )
 
     return jsonify({
         "workouts": [w.to_dict() for w in pagination.items],
@@ -37,7 +39,9 @@ def get_workouts():
 @workouts_bp.route("/workouts/<int:workout_id>", methods=["GET"])
 @jwt_required()
 def get_workout(workout_id):
-    workout = Workout.query.get(workout_id)
+    user_id = get_jwt_identity()
+    # Ensure users can only access their own workouts
+    workout = Workout.query.filter_by(id=workout_id, user_id=user_id).first()
     if not workout:
         return jsonify({"error": "Workout not found"}), 404
     return jsonify(workout.to_dict()), 200
@@ -69,7 +73,8 @@ def create_workout():
 @workouts_bp.route("/workouts/<int:workout_id>", methods=["PATCH"])
 @jwt_required()
 def update_workout(workout_id):
-    workout = Workout.query.get(workout_id)
+    user_id = get_jwt_identity()
+    workout = Workout.query.filter_by(id=workout_id, user_id=user_id).first()
     if not workout:
         return jsonify({"error": "Workout not found"}), 404
 
@@ -91,7 +96,8 @@ def update_workout(workout_id):
 @workouts_bp.route("/workouts/<int:workout_id>", methods=["DELETE"])
 @jwt_required()
 def delete_workout(workout_id):
-    workout = Workout.query.get(workout_id)
+    user_id = get_jwt_identity()
+    workout = Workout.query.filter_by(id=workout_id, user_id=user_id).first()
     if not workout:
         return jsonify({"error": "Workout not found"}), 404
 
