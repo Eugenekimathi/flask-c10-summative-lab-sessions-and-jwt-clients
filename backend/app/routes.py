@@ -20,8 +20,18 @@ def parse_date(value):
 @workouts_bp.route("/workouts", methods=["GET"])
 @jwt_required()
 def get_workouts():
-    workouts = Workout.query.all()
-    return jsonify([w.to_dict() for w in workouts]), 200
+    page = request.args.get("page", 1, type=int)
+    per_page = min(request.args.get("per_page", 10, type=int), 50)
+
+    pagination = Workout.query.paginate(page=page, per_page=per_page, error_out=False)
+
+    return jsonify({
+        "workouts": [w.to_dict() for w in pagination.items],
+        "page": pagination.page,
+        "per_page": pagination.per_page,
+        "total": pagination.total,
+        "total_pages": pagination.pages,
+    }), 200
 
 
 @workouts_bp.route("/workouts/<int:workout_id>", methods=["GET"])
