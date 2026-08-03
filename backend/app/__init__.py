@@ -1,6 +1,6 @@
 from flask import Flask
 
-from app.extensions import db, migrate, bcrypt, jwt
+from app.extensions import db, migrate, bcrypt, jwt, ma
 from app.config import Config
 
 
@@ -12,7 +12,7 @@ def create_app(config_class=Config):
     migrate.init_app(app, db)
     bcrypt.init_app(app)
     jwt.init_app(app)
-
+    ma.init_app(app)
     from app.auth import auth_bp
     from app.routes import workouts_bp
 

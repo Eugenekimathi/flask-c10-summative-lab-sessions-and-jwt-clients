@@ -1,18 +1,23 @@
 from flask import Blueprint, request, jsonify
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity
+from marshmallow import ValidationError
 from app.extensions import db
 from app.models import User
+from app.schemas import user_schema
 
 auth_bp = Blueprint("auth", __name__)
 
 
 @auth_bp.route("/signup", methods=["POST"])
 def signup():
-    data = request.get_json() or {}
-    username = data.get("username")
-    email = data.get("email")
-    password = data.get("password")
+    try:
+        data = user_schema.load(request.get_json() or {})
+    except ValidationError as err:
+        return jsonify({"error": err.messages}), 400
 
+    username = data["username"]
+    email = data["email"]
+    password = data["password"]
     if not username or not email or not password:
         return jsonify({"error": "username, email, and password are required."}), 400
 

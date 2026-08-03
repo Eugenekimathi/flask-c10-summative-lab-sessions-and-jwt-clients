@@ -2,6 +2,7 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_migrate import Migrate
 from flask_bcrypt import Bcrypt
 from flask_jwt_extended import JWTManager
+from flask_marshmallow import Marshmallow
 from sqlalchemy import MetaData
 
 naming_convention = {
@@ -17,3 +18,4 @@ db = SQLAlchemy(metadata=metadata)
 migrate = Migrate()
 bcrypt = Bcrypt()
 jwt = JWTManager()
+ma = Marshmallow()
